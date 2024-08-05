@@ -1,23 +1,24 @@
 spring:
   application:
     name: config-server
-  config:
-    activate:
-      on-profile: native
----
-spring:
   profiles:
     active: prod
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
   cloud:
     config:
       server:
         git:
-          uri: git@github.com:marco-antonio-bejar-villalba/POC-eureka-configserver.git
+          uri: https://github.com/marco-antonio-bejar-villalba/POC-eureka-configserver.git
           search-paths: configurations
 ---
 spring:
-  profiles:
-    active: native
+  config:
+    activate:
+      on-profile: native
   cloud:
     config:
       server:
