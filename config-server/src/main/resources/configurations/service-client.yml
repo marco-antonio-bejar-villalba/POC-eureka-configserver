@@ -1,0 +1,20 @@
+eureka:
+  client:
+    enabled: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+server:
+  port: 9092
+user:
+  api:
+    url: /api/v1/user-services/users
+    service: service-server
+  client:
+    api:
+      url: /api/v1/admin-services/users
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
