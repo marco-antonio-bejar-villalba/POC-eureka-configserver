@@ -9,6 +9,12 @@ spring:
         enabled: true
         alphanumeric-ids:
           enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 1000
+            readTimeout: 1000
+            loggerLevel: full
 resilience4j:
   circuitbreaker:
     instances:
@@ -27,6 +33,8 @@ resilience4j:
           - feign.FeignException
           - java.lang.InternalError
           - java.lang.Exception
+#
+#
 #    configs:
 #      default:
 #        slidingWindowSize: 5
@@ -46,6 +54,16 @@ resilience4j:
 
   retry:
     instances:
+      userServiceClient:
+        max-attempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+          - java.lang.InternalError
+          - java.lang.Exception
+          - java.net.SocketTimeoutException
       UserServiceClientsaveUser:
         max-attempts: 3
         waitDuration: 1s
@@ -54,15 +72,21 @@ resilience4j:
           - java.util.concurrent.TimeoutException
           - feign.FeignException
           - java.lang.InternalError
-#    configs:
-#      default:
-#        max-attempts: 3
-#        waitDuration: 1s
-#        retryExceptions:
-#          - java.io.IOException
-#          - java.util.concurrent.TimeoutException
-#          - feign.FeignException
-#          - java.lang.InternalError
+          - java.lang.Exception
+          - java.net.SocketTimeoutException
+    configs:
+      default:
+        max-attempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.FeignException
+          - java.lang.InternalError
+          - java.lang.Exception
+          - java.net.SocketTimeoutException
+    metrics:
+      enabled: true
 #@FeignClient(url = "http://localhost:8080")
 #  public interface DemoClient {
 #

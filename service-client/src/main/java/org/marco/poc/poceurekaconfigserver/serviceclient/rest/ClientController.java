@@ -2,7 +2,9 @@ package org.marco.poc.poceurekaconfigserver.serviceclient.rest;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties;
+import io.github.resilience4j.retry.RetryRegistry;
 import lombok.RequiredArgsConstructor;
+import org.marco.poc.poceurekaconfigserver.serviceclient.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +21,23 @@ public class ClientController {
     private static final Logger log = LoggerFactory.getLogger(ClientController.class);
     private final UserServiceClient userServiceClient;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final RetryRegistry retryRegistry;
     private final CommonCircuitBreakerConfigurationProperties commonCircuitBreakerConfigurationProperties;
 
     @PostMapping
     public ResponseEntity<UserDTO> saveUser(@RequestBody UserDTO user) {
+        log.warn("Creating user: {}", LogUtil.objectToJson(user));
+        logResilienceEvents();
         return ResponseEntity.ok(userServiceClient.saveUser(user));
+    }
+
+    private void logResilienceEvents() {
+        log.error("Circuit breakers names: {}",
+                circuitBreakerRegistry.getAllCircuitBreakers().stream().map(circuitBreaker -> circuitBreaker.getName()).collect(Collectors.joining("|")));
+        log.error("CircuitBreakerRegistry: {}", circuitBreakerRegistry
+                .circuitBreaker("UserServiceClientgetAllUsers").getMetrics().getNumberOfFailedCalls());
+        log.error("RetryRegistry: {}", retryRegistry.getAllRetries().stream().map(retry -> retry.getName()).collect(Collectors.joining("|")));
+
     }
 
     @PutMapping
@@ -43,12 +57,7 @@ public class ClientController {
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        log.error("CircuitBreakerConfigurationProperties: {}",
-                circuitBreakerRegistry.getAllCircuitBreakers().stream().map(circuitBreaker -> circuitBreaker.getName()).collect(Collectors.joining()));
-        log.error("CircuitBreakerRegistry: {}", circuitBreakerRegistry
-                .circuitBreaker("SERVICE-SERVER").getMetrics().getNumberOfFailedCalls());
-        log.error("CircuitBreakerRegistry: {}", circuitBreakerRegistry
-                .circuitBreaker("UserServiceClientgetAllUsers").getMetrics().getNumberOfFailedCalls());
+        logResilienceEvents();
 
         return ResponseEntity.ok(userServiceClient.getAllUsers());
     }

@@ -25,6 +25,16 @@ public class UserServiceAdapter implements UserServicePort {
 
   @Override
   public UserDTO saveUser(UserDTO userDTO) {
+    int i = random.nextInt(0, 2);
+    log.error("Random number for delay: {}, key {}", i, userDTO.getUsername());
+    if(i == 0) {
+        try {
+            Thread.sleep(1100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     return UserMapper.userToUserDTO(jpaUserRepository.save(UserMapper.userDTOToUser(userDTO)));
   }
 
